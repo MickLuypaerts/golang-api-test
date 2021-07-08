@@ -5,15 +5,15 @@ import (
 	"net/http"
 )
 
-type Hello struct {
+type hello struct {
 	l *log.Logger
 }
 
-func NewHello(l *log.Logger) *Hello {
-	return &Hello{l}
+func NewHello(l *log.Logger) *hello {
+	return &hello{l}
 }
 
-func (h *Hello) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *hello) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.l.Println("Hello World")
 	w.Write([]byte("Hello World"))
 }

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"brewery/api/data"
+	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -14,5 +16,10 @@ func NewProducts(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	prodList := data.GetProducts()
+	data, err := json.Marshal(prodList)
+	if err != nil {
+		http.Error(w, "Unable to marshal json.", http.StatusInternalServerError)
+	}
+	w.Write(data)
 }

@@ -15,13 +15,12 @@ func NewProducts(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+	switch r.Method {
+	case http.MethodGet:
 		p.getProducts(w, r)
-		return
-	} else if r.Method == http.MethodPost {
+	case http.MethodPost:
 		p.addProduct(w, r)
-		return
-	} else {
+	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }

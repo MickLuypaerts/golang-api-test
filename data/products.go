@@ -1,25 +1,50 @@
 package data
 
 import (
+	"encoding/json"
+	"io"
 	"time"
 )
 
 type Product struct {
-	ID          int
-	Name        string
-	Description string
-	Price       float32
-	SKU         string //stock-keeping unit
-	CreatedOn   string
-	UpdatedOn   string
-	DeletedOn   string
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float32 `json:"price"`
+	SKU         string  `json:"sku"` //stock-keeping unit
+	CreatedOn   string  `json:"-"`
+	UpdatedOn   string  `json:"-"`
+	DeletedOn   string  `json:"-"`
 }
 
-func GetProducts() []*Product {
+func (p *Product) FromJSON(r io.Reader) error {
+	e := json.NewDecoder(r)
+	return e.Decode(p)
+}
+
+type Products []*Product
+
+func (p *Products) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(p)
+}
+
+func GetProducts() Products {
 	return productList
 }
 
-var productList = []*Product{
+func AddProduct(prod *Product) {
+	prod.ID = getNextID()
+	productList = append(productList, prod)
+}
+
+// temp id gen
+func getNextID() int {
+	prodList := productList[len(productList)-1]
+	return prodList.ID + 1
+}
+
+var productList = Products{
 	&Product{
 		ID:          1,
 		Name:        "Luxs",

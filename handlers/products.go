@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"brewery/api/data"
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -16,10 +15,33 @@ func NewProducts(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		p.getProducts(w, r)
+		return
+	} else if r.Method == http.MethodPost {
+		p.addProduct(w, r)
+		return
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle GET Products")
 	prodList := data.GetProducts()
-	data, err := json.Marshal(prodList)
+	err := prodList.ToJSON(w)
 	if err != nil {
 		http.Error(w, "Unable to marshal json.", http.StatusInternalServerError)
 	}
-	w.Write(data)
+}
+
+func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle POST Products")
+
+	prod := &data.Product{}
+	err := prod.FromJSON(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to marshal json.", http.StatusBadRequest)
+	}
+	data.AddProduct(prod)
 }

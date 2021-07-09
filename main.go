@@ -12,12 +12,10 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "brewery-api ", log.LstdFlags)
-	helloHandler := handlers.NewHello(l)
 	prodHandler := handlers.NewProducts(l)
 
 	sm := http.NewServeMux()
-	sm.Handle("/", helloHandler)
-	sm.Handle("/getproducts", prodHandler)
+	sm.Handle("/", prodHandler)
 	log.Printf("Starting  the server on 8080\n")
 	s := &http.Server{
 		Addr:    ":8080",

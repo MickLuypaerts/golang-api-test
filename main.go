@@ -1,7 +1,5 @@
 package main
 
-// https://www.youtube.com/watch?v=DD3JlT_u0DM
-// https://regex101.com/
 import (
 	"brewery/api/handlers"
 	"context"

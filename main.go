@@ -5,6 +5,7 @@ package main
 import (
 	"brewery/api/handlers"
 	"context"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -16,8 +17,18 @@ func main() {
 	l := log.New(os.Stdout, "brewery-api ", log.LstdFlags)
 	prodHandler := handlers.NewProducts(l)
 
-	sm := http.NewServeMux()
-	sm.Handle("/", prodHandler)
+	sm := mux.NewRouter()
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", prodHandler.GET)
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.Use(prodHandler.MiddleWareProductsValidation)
+	putRouter.HandleFunc("/{id:[0-9+]}", prodHandler.PUT)
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.Use(prodHandler.MiddleWareProductsValidation)
+	postRouter.HandleFunc("/", prodHandler.POST)
+
 	log.Printf("Starting  the server on 8080\n")
 	s := &http.Server{
 		Addr:    ":8080",

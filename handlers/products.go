@@ -3,6 +3,7 @@ package handlers
 import (
 	"brewery/api/data"
 	"context"
+	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -47,8 +48,19 @@ func (p Products) MiddleWareProductsValidation(next http.Handler) http.Handler {
 		prod := &data.Product{}
 		err := prod.FromJSON(r.Body)
 		if err != nil {
-			http.Error(w, "Unable to marshal json.", http.StatusBadRequest)
+			p.l.Println("[ERROR] deserializing product", err)
+			http.Error(w, "Error reading product", http.StatusBadRequest)
 		}
+
+		// validate the product
+		err = prod.Validate()
+		if err != nil {
+			p.l.Println("[ERROR] validating product", err)
+			http.Error(w, fmt.Sprintf("Error validating product: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		// add product to the context
 		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
 		req := r.WithContext(ctx)
 		next.ServeHTTP(w, req)

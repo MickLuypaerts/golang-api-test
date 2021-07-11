@@ -9,7 +9,10 @@ go get github.com/go-playground/validator
 https://github.com/go-playground/validator
 https://github.com/gorilla/mux
 
-## Usefull links
+## go docs
+https://pkg.go.dev/github.com/go-playground/validator/v10
 
+
+## Usefull links
 https://regex101.com/
 

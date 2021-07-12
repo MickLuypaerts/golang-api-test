@@ -12,6 +12,7 @@ require (
 	github.com/go-swagger/go-swagger v0.27.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lib/pq v1.10.2 // indirect
 	github.com/spf13/viper v1.8.1 // indirect
 	go.mongodb.org/mongo-driver v1.5.4 // indirect
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect

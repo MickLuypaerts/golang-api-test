@@ -9,7 +9,13 @@ import (
 	"time"
 )
 
+// Product defines the structure for an API product
+// swagger:model
 type Product struct {
+	// the id for this product
+	//
+	// required: true
+	//
 	ID          int     `json:"id"`
 	Name        string  `json:"name" validate:"required"`
 	Description string  `json:"description"`
@@ -47,24 +53,24 @@ func validateSKU(fl validator.FieldLevel) bool {
 }
 
 func UpdateProduct(p *Product, id int) error {
-	_, pos, err := findProduct(id)
-	if err != nil {
-		return err
+	index := findIndexByProductID(id)
+	if index == -1 {
+		return ErrProductNotFound
 	}
 	p.ID = id
-	productList[pos] = p
+	productList[index] = p
 	return nil
 }
 
 var ErrProductNotFound = fmt.Errorf("Product not found")
 
-func findProduct(id int) (*Product, int, error) {
+func findIndexByProductID(id int) int {
 	for i, prod := range productList {
 		if prod.ID == id {
-			return prod, i, nil
+			return i
 		}
 	}
-	return nil, -1, ErrProductNotFound
+	return -1
 }
 
 func GetProducts() Products {
@@ -74,6 +80,15 @@ func GetProducts() Products {
 func AddProduct(prod *Product) {
 	prod.ID = getNextID()
 	productList = append(productList, prod)
+}
+
+func DeleteProduct(id int) error {
+	index := findIndexByProductID(id)
+	if index == -1 {
+		return ErrProductNotFound
+	}
+	productList = append(productList[:index], productList[index+1])
+	return nil
 }
 
 // temp id gen

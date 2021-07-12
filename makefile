@@ -9,3 +9,6 @@ addproduct:
 
 updateproduct:
 	curl -v localhost:8080/$(id) -d "{\"name\": \"updated name\", \"description\": \"test desc remove this\"}" -XPUT | jq
+
+swagger:
+	swagger generate spec -o ./swagger.yaml --scan-models

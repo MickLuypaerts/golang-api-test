@@ -3,6 +3,7 @@ package main
 import (
 	"brewery/api/handlers"
 	"context"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -19,6 +20,12 @@ func main() {
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", prodHandler.GET)
 
+	options := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(options, nil)
+	getRouter.Handle("/docs", sh)
+
+	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
+
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.Use(prodHandler.MiddleWareProductsValidation)
 	putRouter.HandleFunc("/{id:[0-9+]}", prodHandler.PUT)
@@ -26,6 +33,9 @@ func main() {
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.Use(prodHandler.MiddleWareProductsValidation)
 	postRouter.HandleFunc("/", prodHandler.POST)
+
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/{id:[0-9]+}", prodHandler.Delete)
 
 	log.Printf("Starting  the server on 8080\n")
 	s := &http.Server{

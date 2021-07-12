@@ -3,6 +3,7 @@
 ``` bash
 go get -u github.com/gorilla/mux
 go get github.com/go-playground/validator
+go get -u github.com/go-swagger/go-swagger/cmd/swagger
 ```
 ## go packages links
 

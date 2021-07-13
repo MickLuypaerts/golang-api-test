@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/validator"
 	"io"
 	"regexp"
-	"time"
 )
 
 // Product defines the structure for an API product
@@ -16,17 +15,36 @@ type Product struct {
 	//
 	// required: true
 	//
-	ID          int     `json:"id"`
-	Name        string  `json:"name" validate:"required"`
-	Description string  `json:"description"`
-	Price       float32 `json:"price" validate:"gt=0"`
-	SKU         string  `json:"sku" validate:"required,sku"` //stock-keeping unit
-	CreatedOn   string  `json:"-"`
-	UpdatedOn   string  `json:"-"`
-	DeletedOn   string  `json:"-"`
+	ID int `json:"id"`
+
+	// the name for this poduct
+	//
+	// required: true
+	// max length: 255
+	Name string `json:"name" validate:"required"`
+
+	// the description for this poduct
+	//
+	// required: true
+	// max length: 255
+	Description string `json:"description"`
+
+	// the price for the product
+	//
+	// required: true
+	// min: 0.01
+	Price float32 `json:"price" validate:"gt=0"`
+
+	// the SKU for the product
+	//
+	// required: true
+	// pattern: [a-z]+-[a-z]+-[0-9]+
+	SKU string `json:"sku" validate:"required,sku"`
 }
 
 type Products []*Product
+
+var ErrProductNotFound = fmt.Errorf("Product not found")
 
 func (p *Product) FromJSON(r io.Reader) error {
 	e := json.NewDecoder(r)
@@ -50,70 +68,4 @@ func validateSKU(fl validator.FieldLevel) bool {
 	matches := re.FindAllString(fl.Field().String(), -1)
 
 	return len(matches) == 1
-}
-
-func UpdateProduct(p *Product, id int) error {
-	index := findIndexByProductID(id)
-	if index == -1 {
-		return ErrProductNotFound
-	}
-	p.ID = id
-	productList[index] = p
-	return nil
-}
-
-var ErrProductNotFound = fmt.Errorf("Product not found")
-
-func findIndexByProductID(id int) int {
-	for i, prod := range productList {
-		if prod.ID == id {
-			return i
-		}
-	}
-	return -1
-}
-
-func GetProducts() Products {
-	return productList
-}
-
-func AddProduct(prod *Product) {
-	prod.ID = getNextID()
-	productList = append(productList, prod)
-}
-
-func DeleteProduct(id int) error {
-	index := findIndexByProductID(id)
-	if index == -1 {
-		return ErrProductNotFound
-	}
-	productList = append(productList[:index], productList[index+1])
-	return nil
-}
-
-// temp id gen
-func getNextID() int {
-	prodList := productList[len(productList)-1]
-	return prodList.ID + 1
-}
-
-var productList = Products{
-	&Product{
-		ID:          1,
-		Name:        "Luxs",
-		Description: "Dit is een amber kleurig bier zacht van afdronk.",
-		Price:       1.70,
-		SKU:         "luy-luxs-1",
-		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String(),
-	},
-	&Product{
-		ID:          2,
-		Name:        "Luxs Classics",
-		Description: "TODO",
-		Price:       1.70,
-		SKU:         "luy-classic-1",
-		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String(),
-	},
 }

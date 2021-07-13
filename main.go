@@ -12,13 +12,24 @@ import (
 	"time"
 )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "postgres"
+	dbname   = "brewery"
+)
+
+// TODO /products to /product except with GET all
 func main() {
-	l := log.New(os.Stdout, "brewery-api ", log.LstdFlags)
-	prodHandler := handlers.NewProducts(l)
+	handlerLogger := log.New(os.Stdout, "brewery-api ", log.LstdFlags)
+	dbLogger := log.New(os.Stdout, "brewery-db ", log.LstdFlags)
+	prodHandler := handlers.NewProducts(handlerLogger, host, port, user, password, dbname, dbLogger)
 
 	sm := mux.NewRouter()
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", prodHandler.GET)
+	getRouter.HandleFunc("/products", prodHandler.ListAll)
+	getRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.ListSingle)
 
 	options := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
 	sh := middleware.Redoc(options, nil)
@@ -28,14 +39,14 @@ func main() {
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.Use(prodHandler.MiddleWareProductsValidation)
-	putRouter.HandleFunc("/{id:[0-9+]}", prodHandler.PUT)
+	putRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.PUT)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.Use(prodHandler.MiddleWareProductsValidation)
-	postRouter.HandleFunc("/", prodHandler.POST)
+	postRouter.HandleFunc("/products", prodHandler.POST)
 
 	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
-	deleteRouter.HandleFunc("/{id:[0-9]+}", prodHandler.Delete)
+	deleteRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.Delete)
 
 	log.Printf("Starting  the server on 8080\n")
 	s := &http.Server{
@@ -45,14 +56,14 @@ func main() {
 	go func() {
 		err := s.ListenAndServe()
 		if err != nil {
-			l.Fatal(err)
+			handlerLogger.Fatal(err)
 		}
 	}()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt) // Notify broadcast a message on the sigChan when an Interrupt is received
 	sig := <-sigChan
-	l.Println("Received terminate, graceful shutdown.", sig)
+	handlerLogger.Println("Received terminate, graceful shutdown.", sig)
 	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	s.Shutdown(tc)

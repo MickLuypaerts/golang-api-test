@@ -17,9 +17,11 @@ func NewDBConnection(host string, port int, user string, password string, dbname
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
+		l.Println(err)
 		return nil, err
 	}
-	if db.Ping() != nil {
+	if err = db.Ping(); err != nil {
+		l.Println(err)
 		return nil, err
 	}
 	return &DBConnection{db: db, l: l}, nil
@@ -98,7 +100,6 @@ func (db *DBConnection) GetProductWithID(id int) (*data.Product, error) {
 
 	prod := &data.Product{}
 	err := row.Scan(&prod.ID, &prod.Name, &prod.Description, &prod.Price, &prod.SKU)
-	db.l.Printf("%+v\n", prod)
 	if err == sql.ErrNoRows {
 		return nil, data.ErrProductNotFound
 	}

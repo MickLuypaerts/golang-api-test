@@ -2,6 +2,7 @@
 ## go packages installation
 ``` bash
 go get -u github.com/gorilla/mux
+go get -u github.com/gorilla/handlers
 go get github.com/go-playground/validator
 go get -u github.com/go-swagger/go-swagger/cmd/swagger
 go get -u github.com/lib/pq

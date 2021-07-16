@@ -19,13 +19,14 @@ type Products struct {
 	dbConnection *database.DBConnection
 }
 
-func NewProducts(handlerLogger *log.Logger, host string, port int, user string, password string, dbname string, dbLogger *log.Logger) *Products {
+func NewProducts(handlerLogger *log.Logger, host string, port int, user string, password string, dbname string, dbLogger *log.Logger) (*Products, error) {
 	dbConn, err := database.NewDBConnection(host, port, user, password, dbname, dbLogger)
 	if err != nil {
 		dbLogger.Println(err)
+		return nil, err
 	}
 
-	return &Products{l: handlerLogger, dbConnection: dbConn}
+	return &Products{l: handlerLogger, dbConnection: dbConn}, nil
 }
 
 func (p Products) MiddleWareProductsValidation(next http.Handler) http.Handler {

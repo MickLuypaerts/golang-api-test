@@ -18,6 +18,14 @@ services:
             POSTGRES_PASSWORD: postgres
         ports:
             - 5432:5432
+    webpage:
+        build: "frontend/."
+        container_name: "webpage"
+        ports:
+            -80:80
+            depends_on: 
+                - "db"
+                - "api"
     vm:
         image: "ubuntu"
         container_name: "test"

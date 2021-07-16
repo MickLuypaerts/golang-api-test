@@ -22,8 +22,8 @@ services:
         build: "frontend/."
         container_name: "webpage"
         ports:
-            -80:80
-            depends_on: 
+            - 80:80
+        depends_on: 
                 - "db"
                 - "api"
     vm:

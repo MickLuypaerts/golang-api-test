@@ -4,6 +4,7 @@ import (
 	"brewery/api/handlers"
 	"context"
 	"github.com/go-openapi/runtime/middleware"
+	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 )
 
 const (
-	host     = "localhost"
+	host     = "db"
 	port     = 5432
 	user     = "postgres"
 	password = "postgres"
@@ -22,9 +23,13 @@ const (
 
 // TODO /products to /product except with GET all
 func main() {
+	serverLogger := log.New(os.Stdout, "brewery-server ", log.LstdFlags)
 	handlerLogger := log.New(os.Stdout, "brewery-api ", log.LstdFlags)
 	dbLogger := log.New(os.Stdout, "brewery-db ", log.LstdFlags)
-	prodHandler := handlers.NewProducts(handlerLogger, host, port, user, password, dbname, dbLogger)
+	prodHandler, err := handlers.NewProducts(handlerLogger, host, port, user, password, dbname, dbLogger)
+	if err != nil {
+		serverLogger.Fatal(err)
+	}
 
 	sm := mux.NewRouter()
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
@@ -48,22 +53,27 @@ func main() {
 	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
 	deleteRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.Delete)
 
-	log.Printf("Starting  the server on 8080\n")
+	// CORS
+	corsHandler := gohandlers.CORS(gohandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}), gohandlers.AllowedOrigins([]string{"*"}), gohandlers.AllowedMethods([]string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodOptions}))
+	//corsHandler := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:5500"}), gohandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}))
+
 	s := &http.Server{
-		Addr:    ":8080",
-		Handler: sm,
+		Addr:     ":8080",
+		Handler:  corsHandler(sm),
+		ErrorLog: serverLogger,
 	}
+	serverLogger.Printf("Starting  the server on 8080\n")
 	go func() {
 		err := s.ListenAndServe()
 		if err != nil {
-			handlerLogger.Fatal(err)
+			serverLogger.Fatal(err)
 		}
 	}()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt) // Notify broadcast a message on the sigChan when an Interrupt is received
 	sig := <-sigChan
-	handlerLogger.Println("Received terminate, graceful shutdown.", sig)
+	serverLogger.Println("Received terminate, graceful shutdown.", sig)
 	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	s.Shutdown(tc)

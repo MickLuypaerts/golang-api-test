@@ -4,14 +4,48 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="./scripts/product.js"></script>
+    <script defer src="./scripts/inputList.js"></script>
     <script defer src="./scripts/main.js"></script>
     <link rel="stylesheet" href="./style/style.css">
     <title>Document</title>
 </head>
 <body>
-    <div class="container">
-        <table></table>
-    </div>
+    <form id = "putDataForm" method="put">
+        <div id="idCon">
+            <label for="idTxt">id:</label>
+            <input type="text" pattern="[0-9]+" id="idTxt" >
+        </div>
+        <div id="nameCon">
+            <label for="nameTxt">name:</label>
+            <input type="text" id="nameTxt" >
+        </div>
+        <div id="descCon">
+            <label for="descrTxt">description:</label>
+            <input type="text" id="descrTxt" >
+        </div>
+        <div id="priceCon">
+            <label for="priceTxt">price:</label>
+            <input type="text" pattern="[0-9]+" id="priceTxt" >
+        </div>
+        <div id="skuCon">
+            <label for="skuTxt">sku:</label>
+            <input type="text" pattern="[a-z]+-[a-z]+-[1-9]+" id="skuTxt" >
+        </div>
+        <label for="methodsSelector">Choose a method:</label>
+        <select id="methodsSelector" name="methodsSelector">
+            <option value="GET">GET</option>
+            <option value="GET-all">GET-all</option>
+            <option value="PUT">PUT</option>
+            <option value="POST">POST</option>
+            <option value="DELETE">DELETE</option>
+        </select>
+        <input type="submit" value="Submit">
+    </form>
+    <table></table>
+    
+
+
     
 </body>
 </html>

@@ -44,7 +44,7 @@ func main() {
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.Use(prodHandler.MiddleWareProductsValidation)
-	putRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.PUT)
+	putRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.PUT) // TODO: should PUT return the updated product???
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.Use(prodHandler.MiddleWareProductsValidation)
@@ -54,7 +54,7 @@ func main() {
 	deleteRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.Delete)
 
 	// CORS
-	corsHandler := gohandlers.CORS(gohandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}), gohandlers.AllowedOrigins([]string{"*"}), gohandlers.AllowedMethods([]string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodOptions}))
+	corsHandler := gohandlers.CORS(gohandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}), gohandlers.AllowedOrigins([]string{"*"}), gohandlers.AllowedMethods([]string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodOptions, http.MethodDelete}))
 	//corsHandler := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:5500"}), gohandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}))
 
 	s := &http.Server{

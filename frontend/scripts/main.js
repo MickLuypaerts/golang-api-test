@@ -1,37 +1,116 @@
+const baseUrl = "http://localhost:8080/products";
 
 const table = document.querySelector("table");
+const postDataForm  = document.getElementById("putDataForm");
+const methodsSelector = document.getElementById("methodsSelector");
 
-class Product {
-    constructor(id, name, desc, price, sku) {
-        this.id = id;
-        this.name = name;
-        this.desc = desc;
-        this. price = price;
-        this.sku = sku;
-    }
+const idCon = document.getElementById("idCon");
+const nameCon = document.getElementById("nameCon");
+const descCon = document.getElementById("descCon");
+const priceCon = document.getElementById("priceCon");
+const skuCon = document.getElementById("skuCon");
 
-    ToTableRow() {
-        let tableRow = document.createElement("tr");
-        let keys = Object.keys(this);
-        for (let key of keys) {
-            let row = document.createElement("td");
-            row.textContent = this[key];
-            tableRow.appendChild(row);
-        }
-        return tableRow;
-    }
-}
+const getInputs = new InputList([idCon], [nameCon, descCon, priceCon, skuCon]);
+const getAllInputs = new InputList(null, [idCon, nameCon, descCon, priceCon, skuCon]);
+const postInputs = new InputList([nameCon, descCon, priceCon, skuCon],[idCon]);
+const putInputs = new InputList([idCon, nameCon, descCon, priceCon, skuCon], null);
+const deleteInputs = new InputList([idCon], [nameCon, descCon, priceCon, skuCon]);
 
 
 window.addEventListener("load", () => {
-    sendToServer("http://localhost:8080/products", "GET", null)
+    sendToServer(baseUrl, "GET", null)
     .then(response => {
+        idCon.style.visibility = "";
+        nameCon.style.visibility = "hidden";
+        descCon.style.visibility = "hidden";
+        priceCon.style.visibility = "hidden";
+        skuCon.style.visibility = "hidden";
+        methodsSelector.value = "GET";
         if (response != null) {
-            createFirstRow()
+            createFirstRow();
             response.map(prod => addProdToTable(prod));
         }
     });
 });
+
+
+methodsSelector.addEventListener("change", () => {
+    switch(methodsSelector.value) {
+        case "GET":
+            getInputs.Enable();
+            break;
+        case "GET-all":
+            getAllInputs.Enable();
+            break;
+        case "POST":
+            postInputs.Enable();
+            break;
+        case "PUT":
+            putInputs.Enable();
+            break;
+        case "DELETE":
+            deleteInputs.Enable();
+        default:
+            console.log("default");
+      }
+})
+
+postDataForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    let id = event.target[0].value;
+    let data = null;
+
+    switch(methodsSelector.value) {
+        case "GET":
+            sendToServer(baseUrl + "/" + id, "GET",data)
+            .then(response => {
+                if (response != null) {
+                    clearTable();
+                    addProdToTable(response);
+                }
+            });
+            break;
+        case "GET-all":
+            sendToServer(baseUrl, "GET", null)
+            .then(response => {
+                if (response != null) {
+                    clearTable();
+                    response.map(prod => addProdToTable(prod));
+                }
+            });
+            break;
+        case "POST":
+            data = postInputs.GetInputs();
+            sendToServer(baseUrl, "POST", data)
+            .then(response => {
+                console.log(response)
+            })
+            break;
+        case "PUT":
+            console.log(putInputs.GetInputs());
+            data = putInputs.GetInputs();
+            sendToServer(baseUrl + "/" + id, "PUT", data)
+            .then(response => {
+                console.log(response);
+            })
+            break;
+        case "DELETE":
+            sendToServer(baseUrl + "/" + id, "DELETE", null)
+            .then(response => {
+                console.log(response);
+            })
+
+        default:
+            console.log("default");
+      }
+})
+
+function clearTable() {
+    products = document.querySelectorAll("tr#prod");
+    for (product of products) {
+        product.remove();
+    }
+}
 
 function createFirstRow() {
     let tableRow = document.createElement("tr");
@@ -53,6 +132,7 @@ function addProdToTable(product) {
 }
 
 async function sendToServer(url, method, data) {
+    console.log(data);
     try {
         const response = await fetch(url, {
             method: method,

@@ -44,7 +44,7 @@ func main() {
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.Use(prodHandler.MiddleWareProductsValidation)
-	putRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.PUT) // TODO: should PUT return the updated product???
+	putRouter.HandleFunc("/products/{id:[0-9]+}", prodHandler.PUT)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.Use(prodHandler.MiddleWareProductsValidation)

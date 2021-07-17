@@ -4,7 +4,6 @@ import (
 	"brewery/api/data"
 	"brewery/api/database"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -101,8 +100,7 @@ func (p *Products) ListSingle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Product not found", http.StatusInternalServerError)
 		return
 	}
-	e := json.NewEncoder(w)
-	err = e.Encode(prod)
+	err = prod.ToJSON(w)
 	if err != nil {
 		http.Error(w, "Unable to marshal json.", http.StatusInternalServerError)
 	}

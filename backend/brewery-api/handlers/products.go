@@ -152,7 +152,7 @@ func (p *Products) Delete(w http.ResponseWriter, r *http.Request) {
 // swagger:route PUT /products{id} products updateProduct
 // Updates product with the given id
 // responses:
-// 	204: description:The product was updated successfully.
+// 	200: description:The product was updated successfully.
 //	404: description:Product not found
 
 // UpdateProduct updates a product from the database
@@ -178,5 +178,6 @@ func (p *Products) PUT(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Product not found", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+	w.Header().Add("Content-Type", "application/json")
+	prod.ToJSON(w)
 }

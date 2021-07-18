@@ -16,7 +16,7 @@ const postInputs = new InputList([nameCon, descCon, priceCon, skuCon],[idCon]);
 const putInputs = new InputList([idCon, nameCon, descCon, priceCon, skuCon], null);
 const deleteInputs = new InputList([idCon], [nameCon, descCon, priceCon, skuCon]);
 
-
+// TODO: handle 404 product not found error 
 window.addEventListener("load", () => {
     sendToServer(baseUrl, "GET", null)
     .then(response => {
@@ -87,11 +87,11 @@ postDataForm.addEventListener("submit", (event) => {
             })
             break;
         case "PUT":
-            console.log(putInputs.GetInputs());
             data = putInputs.GetInputs();
             sendToServer(baseUrl + "/" + id, "PUT", data)
             .then(response => {
-                console.log(response);
+                clearTable();
+                addProdToTable(response)  
             })
             break;
         case "DELETE":
@@ -99,7 +99,6 @@ postDataForm.addEventListener("submit", (event) => {
             .then(response => {
                 console.log(response);
             })
-
         default:
             console.log("default");
       }
@@ -132,7 +131,6 @@ function addProdToTable(product) {
 }
 
 async function sendToServer(url, method, data) {
-    console.log(data);
     try {
         const response = await fetch(url, {
             method: method,
